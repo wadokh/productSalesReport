@@ -30,6 +30,17 @@ while (hasNextPage) {
                   node {
                     product {
                       id
+                      title
+                      priceRangeV2{
+                        maxVariantPrice{
+                          amount
+                          currencyCode
+                        }
+                        minVariantPrice{
+                          amount
+                          currencyCode
+                        }
+                      }
                     }
                     quantity
                   }
@@ -56,6 +67,7 @@ while (hasNextPage) {
         });
 
         const data = await response.json();
+        console.log(data)
         const orders = data.data.orders.edges;
 
         for (const order of orders) {
@@ -65,9 +77,10 @@ while (hasNextPage) {
             for (const item of order.node.lineItems.edges) {
                 const productId = item.node.product.id;
                 const quantity = item.node.quantity;
-
+                const minprice = parseFloat(item.node.product.priceRangeV2.minVariantPrice.amount)
+                const maxprice = parseFloat(item.node.product.priceRangeV2.maxVariantPrice.amount)
                 if (!productSales[productId]) {
-                    productSales[productId] = { salesIn30Days: 0, salesIn45Days: 0, salesIn90Days: 0 };
+                    productSales[productId] = { salesIn30Days: 0, salesIn45Days: 0, salesIn90Days: 0, minprice: minprice, maxprice: maxprice };
                 }
 
                 const timeDiffInDays = (now - orderDate) / (1000 * 60 * 60 * 24);
@@ -97,14 +110,56 @@ while (hasNextPage) {
 }
 
 for (const productId in productSales) {
-    const { salesIn30Days, salesIn45Days, salesIn90Days } = productSales[productId];
-
+    const { salesIn30Days, salesIn45Days, salesIn90Days, minprice, maxprice } = productSales[productId];
+    const minrevenueIn30Days = salesIn30Days * minprice;
+    const minrevenueIn45Days = salesIn45Days * minprice;
+    const minrevenueIn90Days = salesIn90Days * minprice;
+    const maxrevenueIn30Days = salesIn30Days * maxprice;
+    const maxrevenueIn45Days = salesIn45Days * maxprice;
+    const maxrevenueIn90Days = salesIn90Days * maxprice;
     await prisma.productSales.upsert({
         where: { productId },
         update: { salesIn30Days, salesIn45Days, salesIn90Days },
-        create: { productId, salesIn30Days, salesIn45Days, salesIn90Days },
+        create: { productId, salesIn30Days, salesIn45Days, salesIn90Days, minprice, maxprice, minrevenueIn30Days, minrevenueIn45Days, maxrevenueIn90Days, minrevenueIn90Days, maxrevenueIn30Days, maxrevenueIn45Days },
     });
+    console.log('Sales data successfully stored in the database!');
 }
 
-console.log('Sales data successfully stored in the database!');
 await prisma.$disconnect();
+
+
+// query {
+//     orders(first: 90, after: ${cursor ? `"${cursor}"` : null}, query: "created_at:>=${startDate}") {
+//         edges {
+//             node {
+//                 createdAt
+//                 lineItems(first: 100) {
+//                     edges {
+//                         node {
+//                             quantity
+//                             product {
+//                                 id
+//                                 title
+//                                 variants(first:100){
+//                                     edges{
+//                                         node{
+//                                             id
+//                                             displayName
+//                                             sku
+//                                             price
+//                                         }
+//                                     }
+//                                 }
+//                             }
+//                         }
+//                     }
+//                 }
+//             }
+//         }
+//         pageInfo {
+//             hasNextPage
+//             endCursor
+//         }
+//     }
+// }
+// `;
