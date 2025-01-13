@@ -14,7 +14,7 @@ while (hasNextPage) {
     const query:string = graphqlquery(cursor, startDate);
 
     try {
-        const data:unknown = await postRequest(query);
+        const data:any = await postRequest(query);
         const orders:any = data.data.orders.edges;
 
         for (const order of orders) {
