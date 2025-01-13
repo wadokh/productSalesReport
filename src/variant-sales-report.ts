@@ -5,17 +5,17 @@ import {prismaCreate} from "./dbServices/prismaOperations";
 import {postRequest} from "./shopifyServices/postRequest";
 import {timeValues} from "./utils/timeValues";
 
-let cursor:any = null;
+let cursor:string|null = null;
 let hasNextPage:boolean = true;
 
 const productVariantSales = {};
 
 while (hasNextPage) {
-    const query = graphqlquery(cursor, startDate);
+    const query:string = graphqlquery(cursor, startDate);
 
     try {
         const data:unknown = await postRequest(query);
-        console.log(data)
+        console.log( typeof data)
         const orders:any = data.data.orders.edges;
 
         for (const order of orders) {

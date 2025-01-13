@@ -5,7 +5,7 @@ import {prismaUpsert} from "./dbServices/prismaOperations";
 import {postRequest} from "./shopifyServices/postRequest";
 import {timeValues} from "./utils/timeValues";
 
-let cursor: any = null;
+let cursor: string|null = null;
 let hasNextPage: boolean = true;
 
 const productSales = {};
@@ -23,10 +23,10 @@ while (hasNextPage) {
             const now: Date = new Date();
 
             for (const item of order.node.lineItems.edges) {
-                const productId = item.node.product.id;
-                const quantity = item.node.quantity;
-                const minprice = parseFloat(item.node.product.priceRangeV2.minVariantPrice.amount)
-                const maxprice = parseFloat(item.node.product.priceRangeV2.maxVariantPrice.amount)
+                const productId: string = item.node.product.id;
+                const quantity: number = item.node.quantity;
+                const minprice: number = parseFloat(item.node.product.priceRangeV2.minVariantPrice.amount)
+                const maxprice: number = parseFloat(item.node.product.priceRangeV2.maxVariantPrice.amount)
                 if (!productSales[productId]) {
                     productSales[productId] = { salesIn30Days: 0, salesIn45Days: 0, salesIn90Days: 0, minprice: minprice, maxprice: maxprice };
                 }
