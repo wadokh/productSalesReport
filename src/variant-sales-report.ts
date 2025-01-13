@@ -19,17 +19,17 @@ while (hasNextPage) {
         const orders:any = data.data.orders.edges;
 
         for (const order of orders) {
-            const orderDate = new Date(order.node.createdAt);
-            const now = new Date();
+            const orderDate: Date = new Date(order.node.createdAt);
+            const now: Date = new Date();
 
             for (const item of order.node.lineItems.edges) {
-                const productId = item.node.product.id;
-                const quantity = item.node.quantity;
-                const variantId = item.node.variant.id;
-                const variantName = item.node.variant.displayName;
-                const productOptions = (item.node.product.options);
-                const variantStock = parseInt(item.node.variant.inventoryQuantity);
-                const price = parseFloat(item.node.variant.price)
+                const productId: string = item.node.product.id;
+                const quantity: number = item.node.quantity;
+                const variantId: string = item.node.variant.id;
+                const variantName:string = item.node.variant.displayName;
+                const productOptions:object = (item.node.product.options);
+                const variantStock:number = parseInt(item.node.variant.inventoryQuantity);
+                const price: number = parseFloat(item.node.variant.price)
                 if (!productVariantSales[variantId]) {
                     productVariantSales[variantId] = { salesIn30Days: 0, salesIn45Days: 0, salesIn90Days: 0, price: price, productId: productId, variantName: variantName, inventoryQuantity: variantStock, options: productOptions};
                 }
