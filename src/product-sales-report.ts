@@ -4,24 +4,23 @@ import {startDate} from "./utils/startDate";
 import {prismaUpsert} from "./dbServices/prismaOperations";
 import {postRequest} from "./shopifyServices/postRequest";
 import {timeValues} from "./utils/timeValues";
-let cursor = null;
-let hasNextPage = true;
+
+let cursor: any = null;
+let hasNextPage: boolean = true;
 
 const productSales = {};
 
 while (hasNextPage) {
-    const query = graphqlquery(cursor, startDate);
+    const query: String = graphqlquery(cursor, startDate);
 
     try {
-        const response = await postRequest(query);
-
-        const data = await response.json();
+        const data: unknown = await postRequest(query);
         console.log(data)
         const orders = data.data.orders.edges;
 
         for (const order of orders) {
-            const orderDate = new Date(order.node.createdAt);
-            const now = new Date();
+            const orderDate: Date = new Date(order.node.createdAt);
+            const now: Date = new Date();
 
             for (const item of order.node.lineItems.edges) {
                 const productId = item.node.product.id;
@@ -32,7 +31,7 @@ while (hasNextPage) {
                     productSales[productId] = { salesIn30Days: 0, salesIn45Days: 0, salesIn90Days: 0, minprice: minprice, maxprice: maxprice };
                 }
 
-                const timeDiffInDays = (now - orderDate) / (timeValues.numberOfMillis);
+                const timeDiffInDays: number = (now - orderDate) / (timeValues.numberOfMillis);
 
                 if (timeDiffInDays <= timeValues.daysInMonth) {
                     productSales[productId].salesIn30Days += quantity;

@@ -5,9 +5,8 @@ import {prismaCreate} from "./dbServices/prismaOperations";
 import {postRequest} from "./shopifyServices/postRequest";
 import {timeValues} from "./utils/timeValues";
 
-
-let cursor = null;
-let hasNextPage = true;
+let cursor:any = null;
+let hasNextPage:boolean = true;
 
 const productVariantSales = {};
 
@@ -15,11 +14,9 @@ while (hasNextPage) {
     const query = graphqlquery(cursor, startDate);
 
     try {
-        const response = await postRequest(query);
-
-        const data = await response.json();
+        const data:unknown = await postRequest(query);
         console.log(data)
-        const orders = data.data.orders.edges;
+        const orders:any = data.data.orders.edges;
 
         for (const order of orders) {
             const orderDate = new Date(order.node.createdAt);
@@ -37,7 +34,7 @@ while (hasNextPage) {
                     productVariantSales[variantId] = { salesIn30Days: 0, salesIn45Days: 0, salesIn90Days: 0, price: price, productId: productId, variantName: variantName, inventoryQuantity: variantStock, options: productOptions};
                 }
 
-                const timeDiffInDays = (now - orderDate) / (timeValues.numberOfMillis);
+                const timeDiffInDays:number = (now - orderDate) / (timeValues.numberOfMillis);
 
                 if (timeDiffInDays <= timeValues.daysInMonth) {
                     productVariantSales[variantId].salesIn30Days += quantity;
