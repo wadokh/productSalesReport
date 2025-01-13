@@ -32,6 +32,10 @@ query {
                             product {
                                 id
                                 title
+                                options(first: 3){
+                                  name
+                                  values
+                                }
                             }
                             variant{
                               id
@@ -76,28 +80,27 @@ query {
                 const quantity = item.node.quantity;
                 const variantId = item.node.variant.id;
                 const variantName = item.node.variant.displayName;
+                const productOptions = (item.node.product.options);
                 const variantStock = parseInt(item.node.variant.inventoryQuantity);
-                if (variantStock>0){
-                    const price = parseFloat(item.node.variant.price)
-                    if (!productVariantSales[variantId]) {
-                        productVariantSales[variantId] = { salesIn30Days: 0, salesIn45Days: 0, salesIn90Days: 0, price: price, productId: productId, variantName: variantName, inventoryQuantity: variantStock};
-                    }
-
-                    const timeDiffInDays = (now - orderDate) / (1000 * 60 * 60 * 24);
-
-                    if (timeDiffInDays <= 30) {
-                        productVariantSales[variantId].salesIn30Days += quantity;
-                    }
-                    if (timeDiffInDays <= 45) {
-                        productVariantSales[variantId].salesIn45Days += quantity;
-                    }
-                    if (timeDiffInDays <= 90) {
-                        productVariantSales[variantId].salesIn90Days += quantity;
-                    }
-                    console.log(
-                        `Variant ID: ${variantId} Product ID: ${productId}, Quantity: ${quantity}, Days Since Order: ${timeDiffInDays}, Price: ${price}`
-                    );
+                const price = parseFloat(item.node.variant.price)
+                if (!productVariantSales[variantId]) {
+                    productVariantSales[variantId] = { salesIn30Days: 0, salesIn45Days: 0, salesIn90Days: 0, price: price, productId: productId, variantName: variantName, inventoryQuantity: variantStock, options: productOptions};
                 }
+
+                const timeDiffInDays = (now - orderDate) / (1000 * 60 * 60 * 24);
+
+                if (timeDiffInDays <= 30) {
+                    productVariantSales[variantId].salesIn30Days += quantity;
+                }
+                if (timeDiffInDays <= 45) {
+                    productVariantSales[variantId].salesIn45Days += quantity;
+                }
+                if (timeDiffInDays <= 90) {
+                    productVariantSales[variantId].salesIn90Days += quantity;
+                }
+                console.log(
+                    `Variant ID: ${variantId} Product ID: ${productId}, Quantity: ${quantity}, Days Since Order: ${timeDiffInDays}, Price: ${price}`
+                );
             }
         }
 
@@ -110,15 +113,26 @@ query {
 }
 
 for (const variantId in productVariantSales) {
-    const { salesIn30Days, salesIn45Days, salesIn90Days, price,productId, variantName, inventoryQuantity } = productVariantSales[variantId];
+    const { salesIn30Days, salesIn45Days, salesIn90Days, price,productId, variantName, inventoryQuantity, options } = productVariantSales[variantId];
     const revenueIn30Days = salesIn30Days * price;
     const revenueIn45Days = salesIn45Days * price;
     const revenueIn90Days = salesIn90Days * price;
-    await prisma.inStockVariantSales.upsert({
-        where: { variantId },
-        update: { salesIn30Days, salesIn45Days, salesIn90Days, revenueIn30Days, revenueIn45Days, revenueIn90Days },
-        create: { variantId, variantName, productId, salesIn30Days, salesIn45Days, salesIn90Days, price, revenueIn30Days, revenueIn45Days, revenueIn90Days, inventoryQuantity },
-    });
+    await prisma.VariantSalesInfo.create({
+        data: {
+            variantId,
+            variantName,
+            productId,
+            salesIn30Days,
+            salesIn45Days,
+            salesIn90Days,
+            price,
+            revenueIn30Days,
+            revenueIn45Days,
+            revenueIn90Days,
+            inventoryQuantity,
+            options
+        }
+    })
     console.log('Sales data successfully stored in the database!');
 }
 
