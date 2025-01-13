@@ -38,5 +38,21 @@ model RevenueSales {
   revenueIn90Days Float
   updatedAt       DateTime @updatedAt
 }
+
+model inStockVariantSales {
+  id                Int      @id @default(autoincrement())
+  productId         String
+  variantId         String   @unique
+  variantName       String
+  price             Float
+  inventoryQuantity Int
+  salesIn30Days     Int
+  salesIn45Days     Int
+  salesIn90Days     Int
+  revenueIn30Days   Float
+  revenueIn45Days   Float
+  revenueIn90Days   Float
+  updatedAt         DateTime @updatedAt
+}
 // id, productid, product name, variantid,  variant name, sales in 30 days, sales in 45 days, sales in 90 days, price, revenue in 30 days, revenue in 45 days, revenue  90 days, options: jsonb
 // add options later
