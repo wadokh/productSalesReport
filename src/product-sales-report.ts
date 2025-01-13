@@ -15,7 +15,6 @@ while (hasNextPage) {
 
     try {
         const data: unknown = await postRequest(query);
-        console.log(data)
         const orders = data.data.orders.edges;
 
         for (const order of orders) {
@@ -42,10 +41,6 @@ while (hasNextPage) {
                 if (timeDiffInDays <= timeValues.daysIn3Month) {
                     productSales[productId].salesIn90Days += quantity;
                 }
-
-                console.log(
-                    `Product ID: ${productId}, Quantity: ${quantity}, Days Since Order: ${timeDiffInDays}`
-                );
             }
         }
 
@@ -57,6 +52,8 @@ while (hasNextPage) {
     }
 }
 
+console.log("Fetched product sales data");
+
 for (const productId in productSales) {
     const { salesIn30Days, salesIn45Days, salesIn90Days, minprice, maxprice } = productSales[productId];
     const minrevenueIn30Days = salesIn30Days * minprice;
@@ -66,12 +63,10 @@ for (const productId in productSales) {
     const maxrevenueIn45Days = salesIn45Days * maxprice;
     const maxrevenueIn90Days = salesIn90Days * maxprice;
     try {
-        prismaUpsert(productId, salesIn30Days, salesIn45Days, salesIn90Days, minprice, maxprice, minrevenueIn30Days, minrevenueIn45Days, maxrevenueIn90Days, minrevenueIn90Days, maxrevenueIn30Days, maxrevenueIn45Days)
-            .then(() => {
-                console.log('Sales data successfully stored in the database!');
-            })
+        prismaUpsert(productId, salesIn30Days, salesIn45Days, salesIn90Days, minprice, maxprice, minrevenueIn30Days, minrevenueIn45Days, maxrevenueIn90Days, minrevenueIn90Days, maxrevenueIn30Days, maxrevenueIn45Days);
     } catch (error) {
         console.error('Error inserting data:', error);
     }
 }
 
+console.log("Inserted product sales data");
