@@ -4,18 +4,19 @@ import {startDate} from "./utils/startDate";
 import {prismaUpsert} from "./dbServices/prismaOperations";
 import {postRequest} from "./shopifyServices/postRequest";
 import {timeValues} from "./utils/timeValues";
+import {OrderEdge, ShopifyResponse} from "./types"
 
 let cursor: string|null = null;
 let hasNextPage: boolean = true;
 
-const productSales = {};
+const productSales: { salesIn30Days: number, salesIn45Days:number, salesIn90Days: number, minprice: number, maxprice: number, minrevenueIn30Days: number, minrevenueIn45Days: number, maxrevenueIn90Days: number, minrevenueIn90Days: number, maxrevenueIn30Days:number, maxrevenueIn45Days:number} = {};
 
 while (hasNextPage) {
     const query: String = graphqlquery(cursor, startDate);
 
     try {
-        const data: unknown = await postRequest(query);
-        const orders = data.data.orders.edges;
+        const data: ShopifyResponse = await postRequest(query);
+        const orders:OrderEdge[] = data.data.orders.edges;
 
         for (const order of orders) {
             const orderDate: Date = new Date(order.node.createdAt);
@@ -55,7 +56,7 @@ while (hasNextPage) {
 console.log("Fetched product sales data");
 
 for (const productId in productSales) {
-    const { salesIn30Days, salesIn45Days, salesIn90Days, minprice, maxprice } = productSales[productId];
+    const { salesIn30Days, salesIn45Days, salesIn90Days, minprice, maxprice }:{ salesIn30Days: number, salesIn45Days:number, salesIn90Days: number, minprice: number, maxprice: number} = productSales[productId];
     const minrevenueIn30Days = salesIn30Days * minprice;
     const minrevenueIn45Days = salesIn45Days * minprice;
     const minrevenueIn90Days = salesIn90Days * minprice;

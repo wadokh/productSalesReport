@@ -21,6 +21,7 @@ export const prismaUpsert = async (productId, salesIn30Days, salesIn45Days, sale
             maxrevenueIn45Days
         },
     });
+    await prisma.$disconnect();
 }
 
 export const prismaCreate = async (variantId, variantName, productId, salesIn30Days, salesIn45Days, salesIn90Days, price, revenueIn30Days, revenueIn45Days, revenueIn90Days, inventoryQuantity, options) => {
@@ -40,6 +41,6 @@ export const prismaCreate = async (variantId, variantName, productId, salesIn30D
             options
         }
     })
+    await prisma.$disconnect();
 }
 
-await prisma.$disconnect();

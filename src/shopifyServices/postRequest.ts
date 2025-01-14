@@ -1,7 +1,8 @@
 import fetch from "node-fetch";
 import {graphqlEndpoint, SHOPIFY_ACCESS_TOKEN} from "./shopifyConnection";
+import {ShopifyResponse} from "../types";
 
-export const postRequest = async (query) => {
+export const postRequest = async (query: String): Promise<ShopifyResponse> => {
      const response = await fetch(graphqlEndpoint, {
         method: 'POST',
         headers: {

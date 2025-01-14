@@ -62,6 +62,9 @@ var prismaUpsert = function (productId, salesIn30Days, salesIn45Days, salesIn90D
                 })];
             case 1:
                 _a.sent();
+                return [4 /*yield*/, prisma.$disconnect()];
+            case 2:
+                _a.sent();
                 return [2 /*return*/];
         }
     });
@@ -88,9 +91,11 @@ var prismaCreate = function (variantId, variantName, productId, salesIn30Days, s
                 })];
             case 1:
                 _a.sent();
+                return [4 /*yield*/, prisma.$disconnect()];
+            case 2:
+                _a.sent();
                 return [2 /*return*/];
         }
     });
 }); };
 exports.prismaCreate = prismaCreate;
-await prisma.$disconnect();
