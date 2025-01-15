@@ -8,20 +8,17 @@ datasource db {
 }
 
 model ProductSales {
-  id                 Int      @id @default(autoincrement())
-  productId          String   @unique
-  minprice           Float
-  maxprice           Float
-  salesIn30Days      Int
-  salesIn45Days      Int
-  salesIn90Days      Int
-  minrevenueIn30Days Float
-  minrevenueIn45Days Float
-  minrevenueIn90Days Float
-  maxrevenueIn30Days Float
-  maxrevenueIn45Days Float
-  maxrevenueIn90Days Float
-  updatedAt          DateTime @updatedAt
+  id              Int      @id @default(autoincrement())
+  productId       String   @unique
+  productName     String
+  salesIn30Days   Int
+  salesIn45Days   Int
+  salesIn90Days   Int
+  price           Float
+  revenueIn30Days Float
+  revenueIn45Days Float
+  revenueIn90Days Float
+  updatedAt       DateTime @updatedAt
 }
 
 model VariantSalesInfo {
