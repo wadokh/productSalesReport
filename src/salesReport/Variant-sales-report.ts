@@ -1,7 +1,7 @@
 import 'dotenv/config';
 import {variantsQuery} from "../shopifyServices/queries";
 import {startDate} from "../utils/startDate";
-import {VariantController} from "../dbServices/variantController";
+import {VariantController} from "../dbServices/VariantController";
 import {shopifyService} from "../shopifyServices/shopifyService";
 import {daysIn3Month, daysInMonth, daysInOneAndHalfMonth, numberOfMillis} from "../utils/constants";
 import {OrderEdge, ShopifyResponse, VariantSales, Options} from "../utils/types";

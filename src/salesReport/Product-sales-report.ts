@@ -1,7 +1,7 @@
 import 'dotenv/config';
 import { productsQuery } from "../shopifyServices/queries";
 import { startDate } from "../utils/startDate";
-import { ProductController } from "../dbServices/productController";
+import { ProductController } from "../dbServices/ProductController";
 import { shopifyService } from "../shopifyServices/shopifyService";
 import { daysIn3Month, daysInMonth, daysInOneAndHalfMonth, numberOfMillis } from "../utils/constants";
 import { OrderEdge, ShopifyResponse, ProductSales } from "../utils/types";

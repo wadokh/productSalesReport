@@ -1,4 +1,4 @@
-import { BaseController} from "./baseController";
+import { BaseController} from "./BaseController";
 
 export class ProductController extends BaseController {
 
