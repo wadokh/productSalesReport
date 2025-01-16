@@ -10,7 +10,7 @@ datasource db {
 model ProductSales {
   id              Int      @id @default(autoincrement())
   productId       String   @unique
-  productName     String
+  title           String
   salesIn30Days   Int
   salesIn45Days   Int
   salesIn90Days   Int
@@ -19,13 +19,14 @@ model ProductSales {
   revenueIn45Days Float
   revenueIn90Days Float
   updatedAt       DateTime @updatedAt
+  createdAt       DateTime @default(now())
 }
 
 model VariantSalesInfo {
   id                Int      @id @default(autoincrement())
   productId         String
   variantId         String   @unique
-  variantName       String
+  title             String
   price             Float
   options           Json
   inventoryQuantity Int
@@ -36,6 +37,7 @@ model VariantSalesInfo {
   revenueIn45Days   Float
   revenueIn90Days   Float
   updatedAt         DateTime @updatedAt
+  createdAt         DateTime @default(now())
 }
 // id, productid, product name, variantid,  variant name, sales in 30 days, sales in 45 days, sales in 90 days, price, revenue in 30 days, revenue in 45 days, revenue  90 days, options: jsonb
 // add options later
