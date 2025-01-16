@@ -4,7 +4,7 @@ import {startDate} from "../utils/startDate";
 import {VariantController} from "../dbServices/VariantController";
 import {shopifyService} from "../shopifyServices/shopifyService";
 import {daysIn3Month, daysInMonth, daysInOneAndHalfMonth, numberOfMillis} from "../utils/constants";
-import {OrderEdge, ShopifyResponse, VariantSales, Options, Variant} from "../utils/types";
+import {OrderEdge, ShopifyResponse, VariantSales, Options} from "../utils/types";
 
 export class VariantSalesReport {
 
@@ -62,7 +62,7 @@ export class VariantSalesReport {
         } catch (error) {
             console.error('Error fetching data:', error);
         }
-        console.log("Fetched variants sales data");
+        console.log("Fetched and inserted variant sales data");
     }
 
 
@@ -94,6 +94,5 @@ export class VariantSalesReport {
                 console.error('Error inserting data:', error);
             }
         }
-        console.log("Inserted variants sales data");
     }
 }

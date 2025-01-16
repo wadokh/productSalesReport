@@ -20,45 +20,45 @@ export class ProductSalesReport {
                 const productSales = {} as ProductSales;
                 const query: string = productsQuery(cursor, startDate);
 
-                    const data: ShopifyResponse = await shopifyService(query);
-                    const orders: OrderEdge[] = data.data.orders.edges;
+                const data: ShopifyResponse = await shopifyService(query);
+                const orders: OrderEdge[] = data.data.orders.edges;
 
-                    for (const order of orders) {
-                        const orderDate: Date = new Date(order.node.createdAt);
-                        const now: Date = new Date();
+                for (const order of orders) {
+                    const orderDate: Date = new Date(order.node.createdAt);
+                    const now: Date = new Date();
 
-                        for (const item of order.node.lineItems.edges) {
-                            const productId: string = item.node.product.id;
-                            const title: string = item.node.product.title
-                            const quantity: number = item.node.quantity;
-                            const price: number = parseFloat(item.node.originalUnitPriceSet.presentmentMoney.amount);
-                            if (!productSales[productId]) {
-                                productSales[productId] = { salesIn30Days: 0, salesIn45Days: 0, salesIn90Days: 0, price: price, title: title };
-                            }
+                    for (const item of order.node.lineItems.edges) {
+                        const productId: string = item.node.product.id;
+                        const title: string = item.node.product.title
+                        const quantity: number = item.node.quantity;
+                        const price: number = parseFloat(item.node.originalUnitPriceSet.presentmentMoney.amount);
+                        if (!productSales[productId]) {
+                            productSales[productId] = { salesIn30Days: 0, salesIn45Days: 0, salesIn90Days: 0, price: price, title: title };
+                        }
 
-                            const timeDiffInDays: number = (now.getTime() - orderDate.getTime()) / numberOfMillis;
+                        const timeDiffInDays: number = (now.getTime() - orderDate.getTime()) / numberOfMillis;
 
-                            if (timeDiffInDays <= daysInMonth) {
-                                productSales[productId].salesIn30Days += quantity;
-                            }
-                            if (timeDiffInDays <= daysInOneAndHalfMonth) {
-                                productSales[productId].salesIn45Days += quantity;
-                            }
-                            if (timeDiffInDays <= daysIn3Month) {
-                                productSales[productId].salesIn90Days += quantity;
-                            }
+                        if (timeDiffInDays <= daysInMonth) {
+                            productSales[productId].salesIn30Days += quantity;
+                        }
+                        if (timeDiffInDays <= daysInOneAndHalfMonth) {
+                            productSales[productId].salesIn45Days += quantity;
+                        }
+                        if (timeDiffInDays <= daysIn3Month) {
+                            productSales[productId].salesIn90Days += quantity;
                         }
                     }
-                    this.calculateRevenue(productSales);
-                    await this.insertSalesData(productSales);
-                    hasNextPage = data.data.orders.pageInfo.hasNextPage;
-                    cursor = data.data.orders.pageInfo.endCursor;
+                }
+                this.calculateRevenue(productSales);
+                await this.insertSalesData(productSales);
+                hasNextPage = data.data.orders.pageInfo.hasNextPage;
+                cursor = data.data.orders.pageInfo.endCursor;
 
             }
         } catch (error) {
             console.error('Error fetching data:', error);
         }
-        console.log("Fetched product sales data");
+        console.log("Fetched and inserted product sales data");
     }
 
 
@@ -95,6 +95,5 @@ export class ProductSalesReport {
                 console.error('Error inserting data:', error);
             }
         }
-        console.log("Inserted product sales data");
     }
 }

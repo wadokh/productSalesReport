@@ -8,3 +8,4 @@ export const daysInOneAndHalfMonth = 45;
 export const daysIn3Month = 90;
 export const firstLimit = 250;
 export const optionsLimit = 3;
+export const variantsLimit = 2000;

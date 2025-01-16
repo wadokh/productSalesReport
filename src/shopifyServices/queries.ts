@@ -1,7 +1,63 @@
-import {firstLimit} from "../utils/constants";
+import {firstLimit, variantsLimit} from "../utils/constants";
 import {optionsLimit} from "../utils/constants";
 
-export const productsQuery = (cursor, startDate) => {
+export const orderQuery = (cursor: string | null, startDate: string, itemCursor: string | null) => {
+    return `
+    query{
+  orders(first: ${firstLimit}, after: ${cursor ? `"${cursor}"` : null}, query: "created_at:>=${startDate}"}) {
+    nodes{
+      id
+      lineItems(first: ${firstLimit}, after: ${itemCursor ? `"${itemCursor}"` : null}){
+        nodes{
+          originalUnitPriceSet{
+            presentmentMoney{
+              amount
+            }
+          }
+          product{
+            id
+            title
+          }
+          variant{
+            id
+            title
+          }
+        }
+        pageInfo{
+          hasNextPage
+          endCursor
+        }
+      }
+    }
+    pageInfo{
+      hasNextPage
+      endCursor
+    }
+  }
+}
+`
+}
+
+export const allVariantsQuery = (id: string) => {
+    return `
+    query {
+  product(id: "${id}") {
+    title
+    description
+    variantsCount{
+      count
+    }
+    variants(first: ${variantsLimit} ){
+      nodes{
+        id
+        
+      }
+    }
+  }
+}`
+}
+
+export const productsQuery = (cursor: string | null, startDate: string) => {
     return `
       query {
         orders(first: ${firstLimit}, after: ${cursor ? `"${cursor}"` : null}, query: "created_at:>=${startDate}") {

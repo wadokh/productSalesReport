@@ -6,6 +6,17 @@ datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
 }
+model OrderData {
+  id        Int
+  orderId   String
+  orderTime String
+  productId String
+  variantId String
+  price     Float
+  quantity  Int
+  updatedAt DateTime @updatedAt
+  createdAt DateTime @default(nonw())
+}
 
 model ProductSales {
   id              Int      @id @default(autoincrement())

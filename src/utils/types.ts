@@ -12,6 +12,7 @@ export interface OrderEdge {
         createdAt: string;
         lineItems: {
             edges: LineItemEdge[];
+            pageInfo: PageInfo;
         };
     };
 }
