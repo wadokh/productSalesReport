@@ -7,7 +7,7 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 model OrderData {
-  id        Int
+  id        Int      @id @default(autoincrement())
   orderId   String
   orderTime String
   productId String
@@ -15,7 +15,7 @@ model OrderData {
   price     Float
   quantity  Int
   updatedAt DateTime @updatedAt
-  createdAt DateTime @default(nonw())
+  createdAt DateTime @default(now())
 }
 
 model ProductSales {

@@ -3,9 +3,42 @@ export interface ShopifyResponse {
         orders: {
             edges: OrderEdge[];
             pageInfo: PageInfo;
+            nodes: OrderNode[];
         };
     };
 }
+
+interface OrderNode {
+    id: string;
+    createdAt: string;
+    lineItems: {
+        nodes: LineItemNode[];
+        pageInfo: PageInfo;
+    };
+}
+
+export interface LineItemNode {
+    quantity: number;
+    originalUnitPriceSet: {
+        presentmentMoney: {
+            amount: string;
+        };
+    };
+    product: {
+        id: string;
+        title: string;
+    };
+    variant: {
+        id: string;
+        title: string;
+    };
+}
+
+interface PageInfo {
+    hasNextPage: boolean;
+    endCursor: string | null;
+}
+
 
 export interface OrderEdge {
     node: {

@@ -1,14 +1,41 @@
-import {firstLimit, variantsLimit} from "../utils/constants";
+import {firstLimit, oneLimit, variantsLimit} from "../utils/constants";
 import {optionsLimit} from "../utils/constants";
 
-export const orderQuery = (cursor: string | null, startDate: string, itemCursor: string | null) => {
+export const OrderQuery = (cursor: string | null, startDate: string) => {
+    return `
+        query{
+          orders(first: ${oneLimit}, after: ${cursor ? `"${cursor}"` : null}, query: "created_at:>=${startDate}"){
+            pageInfo{
+              hasNextPage
+              endCursor
+            }
+            nodes{
+              id
+              createdAt
+            }
+          }
+        }
+    `
+}
+
+export const lineItemsQuery = (cursor: string | null, startDate: string, itemCursor: string | null, ordersLimit: number) => {
     return `
     query{
-  orders(first: ${firstLimit}, after: ${cursor ? `"${cursor}"` : null}, query: "created_at:>=${startDate}"}) {
+  orders(first: ${ordersLimit}, after: ${cursor ? `"${cursor}"` : null}, query: "created_at:>=${startDate}") {
+    pageInfo{
+      hasNextPage
+      endCursor
+    }
     nodes{
       id
+      createdAt
       lineItems(first: ${firstLimit}, after: ${itemCursor ? `"${itemCursor}"` : null}){
+        pageInfo{
+          hasNextPage
+          endCursor
+        }
         nodes{
+          quantity
           originalUnitPriceSet{
             presentmentMoney{
               amount
@@ -23,15 +50,7 @@ export const orderQuery = (cursor: string | null, startDate: string, itemCursor:
             title
           }
         }
-        pageInfo{
-          hasNextPage
-          endCursor
-        }
       }
-    }
-    pageInfo{
-      hasNextPage
-      endCursor
     }
   }
 }
