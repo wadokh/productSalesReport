@@ -57,6 +57,18 @@ export const lineItemsQuery = (cursor: string | null, startDate: string, itemCur
 `
 }
 
+export const allProductsQuery = (cursor: string | null, startDate: string) => {
+    return `
+    query{
+      products(first: 250){
+        nodes{
+          id
+        }
+      }
+    }
+    `
+}
+
 export const allVariantsQuery = (id: string) => {
     return `
     query {

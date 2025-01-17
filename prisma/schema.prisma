@@ -19,18 +19,14 @@ model OrderData {
 }
 
 model ProductSales {
-  id              Int      @id @default(autoincrement())
-  productId       String   @unique
-  title           String
-  salesIn30Days   Int
-  salesIn45Days   Int
-  salesIn90Days   Int
-  price           Float
-  revenueIn30Days Float
-  revenueIn45Days Float
-  revenueIn90Days Float
-  updatedAt       DateTime @updatedAt
-  createdAt       DateTime @default(now())
+  id        Int      @id @default(autoincrement())
+  productId String   @unique
+  title     String
+  sales     Json
+  price     Float
+  revenue   Json
+  updatedAt DateTime @updatedAt
+  createdAt DateTime @default(now())
 }
 
 model VariantSalesInfo {
@@ -41,14 +37,8 @@ model VariantSalesInfo {
   price             Float
   options           Json
   inventoryQuantity Int
-  salesIn30Days     Int
-  salesIn45Days     Int
-  salesIn90Days     Int
-  revenueIn30Days   Float
-  revenueIn45Days   Float
-  revenueIn90Days   Float
+  sales             Json
+  revenue           Json
   updatedAt         DateTime @updatedAt
   createdAt         DateTime @default(now())
 }
-// id, productid, product name, variantid,  variant name, sales in 30 days, sales in 45 days, sales in 90 days, price, revenue in 30 days, revenue in 45 days, revenue  90 days, options: jsonb
-// add options later
