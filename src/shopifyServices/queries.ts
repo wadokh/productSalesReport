@@ -1,10 +1,10 @@
-import {firstLimit, oneLimit, variantsLimit} from "../utils/constants";
+import {firstLimit, variantsLimit} from "../utils/constants";
 import {optionsLimit} from "../utils/constants";
 
 export const OrderQuery = (cursor: string | null, startDate: string) => {
     return `
         query{
-          orders(first: ${oneLimit}, after: ${cursor ? `"${cursor}"` : null}, query: "created_at:>=${startDate}"){
+          orders(first: ${firstLimit}, after: ${cursor ? `"${cursor}"` : null}, query: "created_at:>=${startDate}"){
             pageInfo{
               hasNextPage
               endCursor
@@ -18,19 +18,12 @@ export const OrderQuery = (cursor: string | null, startDate: string) => {
     `
 }
 
-export const lineItemsQuery = (cursor: string | null, startDate: string, itemCursor: string | null, ordersLimit: number) => {
+export const lineItemsQuery = (orderId: string , itemCursor: string | null) => {
     return `
     query{
-  orders(first: ${ordersLimit}, after: ${cursor ? `"${cursor}"` : null}, query: "created_at:>=${startDate}") {
-    pageInfo{
-      hasNextPage
-      endCursor
-    }
-    nodes{
-      id
-      createdAt
-      lineItems(first: ${firstLimit}, after: ${itemCursor ? `"${itemCursor}"` : null}){
-        pageInfo{
+  order(id: "${orderId}"){
+    lineItems(first: ${firstLimit}, after: ${itemCursor ? `"${itemCursor}"` : null}){
+      pageInfo{
           hasNextPage
           endCursor
         }
@@ -50,11 +43,11 @@ export const lineItemsQuery = (cursor: string | null, startDate: string, itemCur
             title
           }
         }
-      }
     }
   }
 }
 `
+
 }
 
 export const allProductsQuery = (cursor: string | null) => {

@@ -6,6 +6,6 @@ const productVariantSalesReport = new ProductVariantReport();
 const ordersReport = new OrdersReport();
 
 (async () => {
-    //await ordersReport.processSalesData();
-    await productVariantSalesReport.processSalesData();
+    await ordersReport.processSalesData();
+    // await productVariantSalesReport.processSalesData();
 })();

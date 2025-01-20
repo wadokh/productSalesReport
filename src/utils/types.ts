@@ -1,7 +1,7 @@
 import {Prisma} from "@prisma/client";
 import {daysIn3Month, daysInMonth, daysInOneAndHalfMonth} from "./constants";
 
-export interface ShopifyResponse {
+export interface OrderResponse {
     data: {
         orders: {
             edges: OrderEdge[];
@@ -9,6 +9,12 @@ export interface ShopifyResponse {
             nodes: OrderNode[];
         };
     };
+}
+
+export interface OrderNodeResponse {
+    data: {
+        order: OrderNode;
+    }
 }
 
 export interface ProductResponse {
@@ -85,12 +91,6 @@ export interface OrderNode {
         pageInfo: PageInfo;
     };
 }
-
-export const errorOptions = {
-    retries: 3,
-    retryDelay: 1000,
-    retryOn: [429, 500, 503, 540, 530, 504],
-};
 
 export interface LineItemNode {
     quantity: number;
