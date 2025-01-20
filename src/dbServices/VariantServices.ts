@@ -1,7 +1,7 @@
-import { BaseController} from "./BaseController";
+import { BaseServices} from "./BaseServices";
 import {MyProductPayload, VariantData} from "../utils/types";
 
-export class VariantController extends BaseController {
+export class VariantServices extends BaseServices {
 
     constructor() {
         super();

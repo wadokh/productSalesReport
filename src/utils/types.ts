@@ -56,6 +56,15 @@ export interface ProductData {
     revenue: JSON,
 }
 
+export interface OrderData {
+    orderId: string,
+    orderTime: string,
+    productId: string,
+    variantId: string,
+    price: number,
+    quantity: number
+}
+
 export interface VariantData {
     variantId: string,
     title: string,
@@ -76,6 +85,12 @@ export interface OrderNode {
         pageInfo: PageInfo;
     };
 }
+
+export const errorOptions = {
+    retries: 3,
+    retryDelay: 1000,
+    retryOn: [429, 500, 503, 540, 530, 504],
+};
 
 export interface LineItemNode {
     quantity: number;

@@ -8,10 +8,10 @@ import {
     Variant, VariantData,
     VariantResponse
 } from "../utils/types";
-import {ProductService, VariantService} from "../shopifyServices/shopifyService";
-import {ProductController} from "../dbServices/ProductController";
+import { ShopifyService } from "../shopifyServices/ShopifyService";
+import {ProductServices} from "../dbServices/ProductServices";
 import {daysIn3Month, daysInMonth, daysInOneAndHalfMonth} from "../utils/constants";
-import {VariantController} from "../dbServices/VariantController";
+import {VariantServices} from "../dbServices/VariantServices";
 import {handlePageInfo, handleSalesRev} from "../utils/helperFunctions";
 
 
@@ -25,25 +25,30 @@ export class ProductVariantReport {
         let hasNextPage: boolean = true;
         let cursor: string | null = null;
         const now: Date = new Date();
-        const productController = new ProductController();
-        const variantController = new VariantController();
+        const productController = new ProductServices();
+        const variantController = new VariantServices();
         try{
+            let count: number = 1;
             while(hasNextPage){
+                const shopifyService = new ShopifyService();
                 const query: string = allProductsQuery(cursor);
-                const data: ProductResponse = await ProductService(query);
-                console.log("fetching a batch");
+                const data: ProductResponse = await shopifyService.fetchProducts(query);
+                console.log(`Fetching batch number ${count}`);
                 const products: ProductNode[] = data.data.products.nodes;
                 const pageInfo: PageInfo = data.data.products.pageInfo;
                 [hasNextPage, cursor] = handlePageInfo(pageInfo);
+
                 for (const product of products){
                     const productId: string = product.id;
                     const options: Options = product.options;
                     const title: string = product.title;
                     const ordersLen: number = await this.insertProductData(productId, title, productController, now);
+
                     if (ordersLen > 0){
                         const varQuery: string = allVariantsQuery(productId);
-                        const varData: VariantResponse = await VariantService(varQuery);
+                        const varData: VariantResponse = await shopifyService.fetchVariants(varQuery);
                         const variants: Variant[] = varData.data.product.variants.nodes;
+
                         for (const variant of variants){
                             const variantId: string = variant.id;
                             const title: string = variant.displayName;
@@ -52,14 +57,15 @@ export class ProductVariantReport {
                         }
                     }
                 }
-                console.log("batch inserted");
+                console.log(`Batch number ${count} inserted`);
+                count += 1;
             }
         } catch (e) {
             throw e;
         }
     }
 
-    private async insertProductData(productId: string,title: string, productController: ProductController, now: Date): Promise<number> {
+    private async insertProductData(productId: string, title: string, productController: ProductServices, now: Date): Promise<number> {
         const orders: MyProductPayload[] = await productController.findProducts(productId);
         if (orders.length > 0){
             const sales: salesRev = {
@@ -91,7 +97,7 @@ export class ProductVariantReport {
         return orders.length;
     }
 
-    private async insertVariantData(variantId: string,productId: string, title: string, inventoryQuantity: number, options: Options, now: Date, variantController: VariantController): Promise<void> {
+    private async insertVariantData(variantId: string,productId: string, title: string, inventoryQuantity: number, options: Options, now: Date, variantController: VariantServices): Promise<void> {
         const orders: MyProductPayload[] = await variantController.findVariants(variantId);
         if (orders.length > 0){
             const sales = {

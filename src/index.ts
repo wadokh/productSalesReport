@@ -1,5 +1,5 @@
-import {OrdersReport} from "./salesReport/Orders-report";
-import {ProductVariantReport} from "./salesReport/Product-variant-report";
+import {OrdersReport} from "./salesReport/OrdersReport";
+import {ProductVariantReport} from "./salesReport/ProductVariantReport";
 
 
 const productVariantSalesReport = new ProductVariantReport();

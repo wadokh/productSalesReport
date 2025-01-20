@@ -1,8 +1,8 @@
 import {lineItemsQuery, OrderQuery} from "../shopifyServices/queries";
 import {startDate} from "../utils/startDate";
-import {LineItemNode, OrderNode, PageInfo, ShopifyResponse} from "../utils/types";
-import {shopifyService} from "../shopifyServices/shopifyService";
-import {OrderController} from "../dbServices/OrderController";
+import {LineItemNode, OrderData, OrderNode, PageInfo, ShopifyResponse} from "../utils/types";
+import {ShopifyService} from "../shopifyServices/ShopifyService";
+import {OrderServices} from "../dbServices/OrderServices";
 import {oneLimit} from "../utils/constants";
 import {handlePageInfo} from "../utils/helperFunctions";
 
@@ -18,10 +18,12 @@ export class OrdersReport {
         let cursor: string | null = null;
         let itemCursor: string | null = null;
         try {
+            let count: number = 0;
             while (hasNextPage){
-                console.log("fetching an order batch");
+                console.log(`Fetching order batch number ${count}`);
                 const query: string = OrderQuery(cursor, startDate);
-                const data: ShopifyResponse = await shopifyService(query);
+                const shopifyService = new ShopifyService();
+                const data: ShopifyResponse = await shopifyService.fetchOrders(query);
                 const orders: OrderNode[] = data.data.orders.nodes || [];
                 for (const order of orders) {
                     const orderId: string = order.id;
@@ -29,7 +31,7 @@ export class OrdersReport {
                     let itemNextPage: boolean = true;
                     while (itemNextPage){
                         const itemQuery: string = lineItemsQuery(cursor, startDate, itemCursor, oneLimit);
-                        const itemData: ShopifyResponse = await shopifyService(itemQuery);
+                        const itemData: ShopifyResponse = await shopifyService.fetchOrders(itemQuery);
                         const lineItemNodes: LineItemNode[] = itemData.data.orders.nodes[0].lineItems.nodes;
                         for (const lineItem of lineItemNodes){
                             const productId: string = lineItem.product.id;
@@ -44,7 +46,8 @@ export class OrdersReport {
                 }
                 const pageInfo: PageInfo = data.data.orders.pageInfo;
                 [hasNextPage, cursor] = handlePageInfo(pageInfo);
-                console.log("inserted order item data");
+                console.log(`inserted order item data from batch number ${count}`);
+                count += 1;
             }
         }
         catch (error) {
@@ -54,8 +57,16 @@ export class OrdersReport {
 
     private async insertOrderData(orderId: string, orderTime: string, productId: string, variantId: string, price: number, quantity: number): Promise<void> {
         try{
-            const orderController = new OrderController();
-            await orderController.create(orderId, orderTime, productId, variantId, price, quantity);
+            const orderController = new OrderServices();
+            const orderData: OrderData = {
+                orderId: orderId,
+                orderTime: orderTime,
+                productId: productId,
+                variantId: variantId,
+                price: price,
+                quantity: quantity
+            }
+            await orderController.create(orderData);
         } catch (e) {
             throw e;
         }

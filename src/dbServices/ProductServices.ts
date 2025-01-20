@@ -1,6 +1,6 @@
-import { BaseController} from "./BaseController";
+import { BaseServices} from "./BaseServices";
 import {MyProductPayload, ProductData} from "../utils/types";
-export class ProductController extends BaseController {
+export class ProductServices extends BaseServices {
 
     constructor() {
         super();
