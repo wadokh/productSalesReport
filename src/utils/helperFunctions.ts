@@ -5,7 +5,7 @@ export const handlePageInfo = (pageInfo: PageInfo): [boolean, string | null] => 
     return [pageInfo.hasNextPage, pageInfo.endCursor];
 }
 
-export const handleSalesRev = (now: Date, sales: salesRev, revenue: salesRev, orderDate: Date, quantity: number, price: number): void => {
+export const handleSalesRev = (now: Date, sales: salesRev, revenue: salesRev, orderDate: Date, price: number, quantity: number ): void => {
     const timeDiffInDays: number = (now.getTime() - orderDate.getTime()) / numberOfMillis;
     if (timeDiffInDays <= daysInMonth) {
         sales[daysInMonth] += quantity;
@@ -19,4 +19,5 @@ export const handleSalesRev = (now: Date, sales: salesRev, revenue: salesRev, or
         sales[daysIn3Month] += quantity;
         revenue[daysIn3Month] += quantity*price;
     }
+    console.log(sales);
 }
