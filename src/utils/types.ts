@@ -1,4 +1,5 @@
 import {Prisma} from "@prisma/client";
+import {daysIn3Month, daysInMonth, daysInOneAndHalfMonth} from "./constants";
 
 export interface ShopifyResponse {
     data: {
@@ -40,9 +41,34 @@ const productSelect = {
     price: true,
     quantity: true,
 }
+
+export interface salesRev{
+    [daysInMonth]: number;
+    [daysInOneAndHalfMonth]: number;
+    [daysIn3Month]: number;
+}
+
+export interface ProductData {
+    productId: string,
+    title: string,
+    sales: JSON,
+    price: number,
+    revenue: JSON,
+}
+
+export interface VariantData {
+    variantId: string,
+    title: string,
+    productId: string,
+    sales: JSON,
+    price: number,
+    revenue: JSON,
+    inventoryQuantity: number,
+    options: string
+}
 export type MyProductPayload = Prisma.ProductGetPayload<{ select: typeof productSelect }>
 
-interface OrderNode {
+export interface OrderNode {
     id: string;
     createdAt: string;
     lineItems: {
@@ -119,32 +145,4 @@ export interface Variant {
 export interface PageInfo {
     hasNextPage: boolean;
     endCursor: string | null;
-}
-
-export interface ProductSales{
-    productName: string;
-    salesIn30Days: number,
-    salesIn45Days:number,
-    salesIn90Days: number,
-    price: number,
-    revenueIn30Days: number,
-    revenueIn45Days: number,
-    revenueIn90Days: number,
-}
-
-export interface VariantSales{
-    key(variantId: string): VariantSalesData;
-}
-export interface VariantSalesData{
-    variantName: string,
-    productId: string,
-    salesIn30Days: number,
-    salesIn45Days: number,
-    salesIn90Days: number,
-    price: number,
-    revenueIn30Days: number,
-    revenueIn45Days: number,
-    revenueIn90Days: number,
-    inventoryQuantity: number,
-    options: Options
 }

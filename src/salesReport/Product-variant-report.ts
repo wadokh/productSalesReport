@@ -1,36 +1,45 @@
 import {allProductsQuery, allVariantsQuery} from "../shopifyServices/queries";
-import {MyProductPayload, Options, ProductNode, ProductResponse, Variant, VariantResponse} from "../utils/types";
+import {
+    MyProductPayload,
+    Options,
+    PageInfo, ProductData,
+    ProductNode,
+    ProductResponse, salesRev,
+    Variant, VariantData,
+    VariantResponse
+} from "../utils/types";
 import {ProductService, VariantService} from "../shopifyServices/shopifyService";
 import {ProductController} from "../dbServices/ProductController";
-import {daysIn3Month, daysInMonth, daysInOneAndHalfMonth, numberOfMillis} from "../utils/constants";
+import {daysIn3Month, daysInMonth, daysInOneAndHalfMonth} from "../utils/constants";
 import {VariantController} from "../dbServices/VariantController";
+import {handlePageInfo, handleSalesRev} from "../utils/helperFunctions";
 
 
 export class ProductVariantReport {
 
-    private now: Date = new Date();
     public async processSalesData(): Promise<void> {
         await this.fetchProductsData();
     }
 
-    private async fetchProductsData(){
+    private async fetchProductsData(): Promise<void> {
         let hasNextPage: boolean = true;
         let cursor: string | null = null;
+        const now: Date = new Date();
         const productController = new ProductController();
         const variantController = new VariantController();
         try{
             while(hasNextPage){
                 const query: string = allProductsQuery(cursor);
                 const data: ProductResponse = await ProductService(query);
-                console.log(data.data.products.pageInfo);
+                console.log("fetching a batch");
                 const products: ProductNode[] = data.data.products.nodes;
-                hasNextPage = data.data.products.pageInfo.hasNextPage;
-                cursor = data.data.products.pageInfo.endCursor;
+                const pageInfo: PageInfo = data.data.products.pageInfo;
+                [hasNextPage, cursor] = handlePageInfo(pageInfo);
                 for (const product of products){
                     const productId: string = product.id;
                     const options: Options = product.options;
                     const title: string = product.title;
-                    const ordersLen: number = await this.insertProductData(productId, title, productController);
+                    const ordersLen: number = await this.insertProductData(productId, title, productController, now);
                     if (ordersLen > 0){
                         const varQuery: string = allVariantsQuery(productId);
                         const varData: VariantResponse = await VariantService(varQuery);
@@ -38,21 +47,52 @@ export class ProductVariantReport {
                         for (const variant of variants){
                             const variantId: string = variant.id;
                             const title: string = variant.displayName;
-                            const price: number = parseInt(variant.price);
                             const inventoryQuantity: number = parseInt(variant.inventoryQuantity);
-                            await this.insertVariantData(variantId, productId, title, price, inventoryQuantity, options, variantController)
+                            await this.insertVariantData(variantId, productId, title, inventoryQuantity, options, now, variantController)
                         }
                     }
                 }
+                console.log("batch inserted");
             }
         } catch (e) {
             throw e;
         }
     }
 
-    private async insertProductData(productId: string,title: string, productController: ProductController){
+    private async insertProductData(productId: string,title: string, productController: ProductController, now: Date): Promise<number> {
         const orders: MyProductPayload[] = await productController.findProducts(productId);
-        console.log(orders.length);
+        if (orders.length > 0){
+            const sales: salesRev = {
+                [daysInMonth]: 0,
+                [daysInOneAndHalfMonth]: 0,
+                [daysIn3Month]: 0,
+            }
+            const revenue: salesRev = {
+                [daysInMonth]: 0,
+                [daysInOneAndHalfMonth]: 0,
+                [daysIn3Month]: 0,
+            }
+            let price: number = 0;
+            for (const order of orders){
+                const orderDate: Date = new Date(order.orderTime);
+                const quantity: number = order.quantity;
+                price = order.price;
+                handleSalesRev(now, sales, revenue, orderDate, price, quantity);
+            }
+            const productData: ProductData = {
+                productId: productId,
+                title: title,
+                sales: JSON.parse(JSON.stringify(sales)),
+                revenue: JSON.parse(JSON.stringify(revenue)),
+                price: price,
+            }
+            await productController.create(productData);
+        }
+        return orders.length;
+    }
+
+    private async insertVariantData(variantId: string,productId: string, title: string, inventoryQuantity: number, options: Options, now: Date, variantController: VariantController): Promise<void> {
+        const orders: MyProductPayload[] = await variantController.findVariants(variantId);
         if (orders.length > 0){
             const sales = {
                 [daysInMonth]: 0,
@@ -69,56 +109,20 @@ export class ProductVariantReport {
                 const orderDate: Date = new Date(order.orderTime);
                 const quantity: number = order.quantity;
                 price = order.price;
-                const timeDiffInDays: number = (this.now.getTime() - orderDate.getTime()) / numberOfMillis;
-                if (timeDiffInDays <= daysInMonth) {
-                    sales[daysInMonth] += quantity;
-                    revenue[daysInMonth] += quantity*price;
-                }
-                if (timeDiffInDays <= daysInOneAndHalfMonth) {
-                    sales[daysInOneAndHalfMonth] += quantity;
-                    revenue[daysInOneAndHalfMonth] += quantity*price;
-                }
-                if (timeDiffInDays <= daysIn3Month) {
-                    sales[daysIn3Month] += quantity;
-                    revenue[daysIn3Month] += quantity*price;
-                }
+                handleSalesRev(now, sales, revenue, orderDate, price, quantity);
             }
-            await productController.create(productId, title, JSON.parse(JSON.stringify(sales)), price, JSON.parse(JSON.stringify(revenue)));
-        }
-        return orders.length;
-    }
+            const variantData: VariantData = {
+                variantId: variantId,
+                productId: productId,
+                price: price,
+                title: title,
+                sales: JSON.parse(JSON.stringify(sales)),
+                revenue: JSON.parse(JSON.stringify(revenue)),
+                options: JSON.stringify(options),
+                inventoryQuantity: inventoryQuantity,
 
-    private async insertVariantData(variantId: string,productId: string, title: string, price: number, inventoryQuantity: number, options: Options, variantController: VariantController){
-        const orders: MyProductPayload[] = await variantController.findVariants(variantId);
-        if (orders.length > 0){
-            const sales = {
-                [daysInMonth]: 0,
-                [daysInOneAndHalfMonth]: 0,
-                [daysIn3Month]: 0,
             }
-            const revenue = {
-                [daysInMonth]: 0,
-                [daysInOneAndHalfMonth]: 0,
-                [daysIn3Month]: 0,
-            }
-            for (const order of orders){
-                const orderDate: Date = new Date(order.orderTime);
-                const quantity: number = order.quantity;
-                const timeDiffInDays: number = (this.now.getTime() - orderDate.getTime()) / numberOfMillis;
-                if (timeDiffInDays <= daysInMonth) {
-                    sales[daysInMonth] += quantity;
-                    revenue[daysInMonth] += quantity*price;
-                }
-                if (timeDiffInDays <= daysInOneAndHalfMonth) {
-                    sales[daysInOneAndHalfMonth] += quantity;
-                    revenue[daysInOneAndHalfMonth] += quantity*price;
-                }
-                if (timeDiffInDays <= daysIn3Month) {
-                    sales[daysIn3Month] += quantity;
-                    revenue[daysIn3Month] += quantity*price;
-                }
-            }
-            await variantController.create(variantId, title, productId, JSON.stringify(sales), price, JSON.stringify(revenue), inventoryQuantity, JSON.stringify(options));
+            await variantController.create(variantData);
         }
     }
 

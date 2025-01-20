@@ -1,6 +1,6 @@
 import fetch from "node-fetch";
 import {graphqlEndpoint, SHOPIFY_ACCESS_TOKEN} from "../utils/constants";
-import {ProductNode, ProductResponse, ShopifyResponse, VariantResponse} from "../utils/types";
+import { ProductResponse, ShopifyResponse, VariantResponse} from "../utils/types";
 
 export const shopifyService = async (query: String): Promise<ShopifyResponse> => {
      const response = await fetch(graphqlEndpoint, {

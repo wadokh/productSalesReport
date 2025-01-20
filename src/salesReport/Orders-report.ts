@@ -1,9 +1,10 @@
 import {lineItemsQuery, OrderQuery} from "../shopifyServices/queries";
 import {startDate} from "../utils/startDate";
-import {LineItemNode, ShopifyResponse} from "../utils/types";
+import {LineItemNode, OrderNode, PageInfo, ShopifyResponse} from "../utils/types";
 import {shopifyService} from "../shopifyServices/shopifyService";
 import {OrderController} from "../dbServices/OrderController";
 import {oneLimit} from "../utils/constants";
+import {handlePageInfo} from "../utils/helperFunctions";
 
 
 export class OrdersReport {
@@ -20,10 +21,10 @@ export class OrdersReport {
             while (hasNextPage){
                 const query: string = OrderQuery(cursor, startDate);
                 const data: ShopifyResponse = await shopifyService(query);
-                const orders = data.data.orders.nodes || [];
+                const orders: OrderNode[] = data.data.orders.nodes || [];
                 for (const order of orders) {
-                    const orderId = order.id;
-                    const orderTime = order.createdAt;
+                    const orderId: string = order.id;
+                    const orderTime: string = order.createdAt;
                     let itemNextPage: boolean = true;
                     while (itemNextPage){
                         const itemQuery: string = lineItemsQuery(cursor, startDate, itemCursor, oneLimit);
@@ -36,12 +37,12 @@ export class OrdersReport {
                             const quantity: number = lineItem.quantity;
                             await this.insertOrderData(orderId, orderTime, productId, variantId, price, quantity);
                         }
-                        itemNextPage = itemData.data.orders.nodes[0].lineItems.pageInfo.hasNextPage;
-                        itemCursor = itemData.data.orders.nodes[0].lineItems.pageInfo.endCursor;
+                        const itemPageInfo: PageInfo = itemData.data.orders.nodes[0].lineItems.pageInfo;
+                        [itemNextPage, itemCursor] = handlePageInfo(itemPageInfo);
                     }
                 }
-                hasNextPage = data.data.orders.pageInfo.hasNextPage;
-                cursor = data.data.orders.pageInfo.endCursor;
+                const pageInfo: PageInfo = data.data.orders.pageInfo;
+                [hasNextPage, cursor] = handlePageInfo(pageInfo);
             }
         }
         catch (error) {
