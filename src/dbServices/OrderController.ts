@@ -7,7 +7,7 @@ export class OrderController extends BaseController {
     }
 
     public async create(orderId: string, orderTime: string, productId: string, variantId: string, price: number, quantity: number): Promise<void> {
-        await this.prisma.orderData.create({
+        await this.prisma.orderItemData.create({
             data: {
                 orderId,
                 orderTime,

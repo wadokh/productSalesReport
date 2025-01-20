@@ -19,6 +19,7 @@ export class OrdersReport {
         let itemCursor: string | null = null;
         try {
             while (hasNextPage){
+                console.log("fetching an order batch");
                 const query: string = OrderQuery(cursor, startDate);
                 const data: ShopifyResponse = await shopifyService(query);
                 const orders: OrderNode[] = data.data.orders.nodes || [];
@@ -43,6 +44,7 @@ export class OrdersReport {
                 }
                 const pageInfo: PageInfo = data.data.orders.pageInfo;
                 [hasNextPage, cursor] = handlePageInfo(pageInfo);
+                console.log("inserted order item data");
             }
         }
         catch (error) {

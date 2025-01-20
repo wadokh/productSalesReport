@@ -19,7 +19,7 @@ export class ProductController extends BaseController {
     }
 
     public async findProducts(productId: string): Promise<MyProductPayload> {
-        const result: MyProductPayload = await this.prisma.orderData.findMany({
+        const result: MyProductPayload = await this.prisma.orderItemData.findMany({
             where: {
                 productId
             }

@@ -23,7 +23,7 @@ export class VariantController extends BaseController {
     }
 
     public async findVariants(variantId: string): Promise<MyProductPayload> {
-        const result: MyProductPayload = await this.prisma.orderData.findMany({
+        const result: MyProductPayload = await this.prisma.orderItemData.findMany({
             where: {
                 variantId
             }
