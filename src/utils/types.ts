@@ -1,3 +1,5 @@
+import {Prisma} from "@prisma/client";
+
 export interface ShopifyResponse {
     data: {
         orders: {
@@ -7,6 +9,38 @@ export interface ShopifyResponse {
         };
     };
 }
+
+export interface ProductResponse {
+    data: {
+        products: {
+            nodes: ProductNode[];
+            pageInfo: PageInfo;
+        };
+    };
+}
+export interface VariantResponse {
+    data: {
+        product: ProductNode;
+    }
+}
+export interface ProductNode {
+    id: string;
+    title: string;
+    options: Options;
+    variants: {
+        nodes: Variant[];
+    };
+}
+
+const productSelect = {
+    orderId: true,
+    orderTime: true,
+    productId: true,
+    variantId: true,
+    price: true,
+    quantity: true,
+}
+export type MyProductPayload = Prisma.ProductGetPayload<{ select: typeof productSelect }>
 
 interface OrderNode {
     id: string;
@@ -34,7 +68,7 @@ export interface LineItemNode {
     };
 }
 
-interface PageInfo {
+export interface PageInfo {
     hasNextPage: boolean;
     endCursor: string | null;
 }
@@ -99,6 +133,9 @@ export interface ProductSales{
 }
 
 export interface VariantSales{
+    key(variantId: string): VariantSalesData;
+}
+export interface VariantSalesData{
     variantName: string,
     productId: string,
     salesIn30Days: number,

@@ -1,23 +1,19 @@
 import { BaseController} from "./BaseController";
-
+import {MyProductPayload} from "../utils/types";
 export class ProductController extends BaseController {
 
     constructor() {
         super();
     }
 
-    public async create(productId: string, title: string, salesIn30Days: number, salesIn45Days: number, salesIn90Days: number, price: number, revenueIn30Days: number, revenueIn45Days: number, revenueIn90Days: number): Promise<void> {
+    public async create(productId: string, title: string, sales: JSON, price: number, revenue: JSON): Promise<void> {
         await this.prisma.productSales.create({
             data: {
                 productId,
                 title,
-                salesIn30Days,
-                salesIn45Days,
-                salesIn90Days,
+                sales,
                 price,
-                revenueIn30Days,
-                revenueIn45Days,
-                revenueIn90Days
+                revenue
             }
         });
     }
@@ -59,6 +55,15 @@ export class ProductController extends BaseController {
                 revenueIn90Days
             }
         })
+    }
+
+    public async findProducts(productId: string): Promise<MyProductPayload> {
+        const result: MyProductPayload = await this.prisma.orderData.findMany({
+            where: {
+                productId
+            }
+        })
+        return result;
     }
 }
 

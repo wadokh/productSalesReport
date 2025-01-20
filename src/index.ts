@@ -1,13 +1,11 @@
-import {ProductSalesReport} from "./salesReport/Product-sales-report";
-import {VariantSalesReport} from "./salesReport/Variant-sales-report";
 import {OrdersReport} from "./salesReport/Orders-report";
+import {ProductVariantReport} from "./salesReport/Product-variant-report";
 
-const productSalesReport = new ProductSalesReport();
-const variantSalesReport = new VariantSalesReport();
+
+const productVariantSalesReport = new ProductVariantReport();
 const ordersReport = new OrdersReport();
 
 (async () => {
-    await ordersReport.processSalesData();
-    // await productSalesReport.processSalesData();
-    // await variantSalesReport.processSalesData();
+    //await ordersReport.processSalesData();
+    await productVariantSalesReport.processSalesData();
 })();

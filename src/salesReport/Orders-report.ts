@@ -20,7 +20,6 @@ export class OrdersReport {
             while (hasNextPage){
                 const query: string = OrderQuery(cursor, startDate);
                 const data: ShopifyResponse = await shopifyService(query);
-                console.log(data);
                 const orders = data.data.orders.nodes || [];
                 for (const order of orders) {
                     const orderId = order.id;
@@ -29,7 +28,6 @@ export class OrdersReport {
                     while (itemNextPage){
                         const itemQuery: string = lineItemsQuery(cursor, startDate, itemCursor, oneLimit);
                         const itemData: ShopifyResponse = await shopifyService(itemQuery);
-                        console.log(itemData);
                         const lineItemNodes: LineItemNode[] = itemData.data.orders.nodes[0].lineItems.nodes;
                         for (const lineItem of lineItemNodes){
                             const productId: string = lineItem.product.id;
@@ -42,7 +40,6 @@ export class OrdersReport {
                         itemCursor = itemData.data.orders.nodes[0].lineItems.pageInfo.endCursor;
                     }
                 }
-                console.log(data.data.orders.pageInfo);
                 hasNextPage = data.data.orders.pageInfo.hasNextPage;
                 cursor = data.data.orders.pageInfo.endCursor;
             }

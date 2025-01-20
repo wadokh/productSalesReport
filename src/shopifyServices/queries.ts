@@ -57,12 +57,21 @@ export const lineItemsQuery = (cursor: string | null, startDate: string, itemCur
 `
 }
 
-export const allProductsQuery = (cursor: string | null, startDate: string) => {
+export const allProductsQuery = (cursor: string | null) => {
     return `
     query{
-      products(first: 250){
+      products(first: ${firstLimit}, after: ${cursor ? `"${cursor}"` : null} ){
         nodes{
           id
+          title
+          options(first: ${optionsLimit}) {
+            name
+            values
+          }
+        }
+        pageInfo{
+          hasNextPage
+          endCursor
         }
       }
     }
@@ -75,13 +84,12 @@ export const allVariantsQuery = (id: string) => {
   product(id: "${id}") {
     title
     description
-    variantsCount{
-      count
-    }
     variants(first: ${variantsLimit} ){
       nodes{
         id
-        
+        displayName
+        inventoryQuantity
+        price
       }
     }
   }
@@ -122,7 +130,7 @@ export const productsQuery = (cursor: string | null, startDate: string) => {
     `;
 }
 
-export const variantsQuery = (cursor, startDate) => {
+export const variantsQuery = (cursor: string | null, startDate: string) => {
     return `
 query {
     orders(first: ${firstLimit}, after: ${cursor ? `"${cursor}"` : null}, query: "created_at:>=${startDate}") {
